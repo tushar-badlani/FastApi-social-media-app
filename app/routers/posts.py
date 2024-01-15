@@ -71,3 +71,26 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
         post_query.update(post.dict())
         db.commit()
         return {"data": "Post updated successfully"}
+
+
+@router.post("/{id}/comment", status_code=status.HTTP_201_CREATED)
+def create_comment(id: int, comment: schemas.PostCreate, db: Session = Depends(get_db), current_user: schemas.UserResponse = Depends(oauth.get_current_user)):
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    if not post_query.first():
+        raise HTTPException(status_code=404, detail="Post not found")
+    else:
+        new_post = models.Post(title=comment.title, content=comment.content, published=comment.published, owner_id=current_user.id, commented_on_id=id)
+        db.add(new_post)
+        db.commit()
+        db.refresh(new_post)
+        return new_post
+
+
+@router.get("/{id}/comments", response_model=List[schemas.Comment])
+def get_comments(id: int, db: Session = Depends(get_db)):
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    if not post_query.first():
+        raise HTTPException(status_code=404, detail="Post not found")
+    else:
+        comments = db.query(models.Post).filter(models.Post.commented_on_id == id).all()
+        return comments

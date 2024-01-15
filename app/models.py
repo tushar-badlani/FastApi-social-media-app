@@ -14,8 +14,10 @@ class Post(Base):
     published = Column(Boolean, server_default="True", nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False)
     owner_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE"), nullable=False)
+    commented_on_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=True)
 
     owner = relationship("User")
+    commented_on = relationship("Post", remote_side=[id])
 
 
 class User(Base):

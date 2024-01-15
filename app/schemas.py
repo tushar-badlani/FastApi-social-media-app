@@ -18,6 +18,10 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserResetPassword(BaseModel):
+    email: EmailStr
+
+
 class PostBase(BaseModel):
     title: str
     content: str
@@ -66,3 +70,11 @@ class TokenData(BaseModel):
 class Vote(BaseModel):
     post_id: int
     dir: conint(ge=0, le=1)
+
+
+class Comment(Post):
+    commented_on_id: int
+
+
+    class Config:
+        orm_mode = True
